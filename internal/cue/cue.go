@@ -8,7 +8,7 @@ import (
 )
 
 func CreateCue(baseName string, chapterFilePath string) {
-	outputFile := "output/" + baseName + ".cue"
+	outputFile := baseName + ".cue"
 	audioFileName := baseName + ".m4b"
 
 	in, err := os.Open(chapterFilePath)

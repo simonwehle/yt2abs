@@ -10,6 +10,7 @@ import (
 	"yt2abs/internal/cue"
 	"yt2abs/internal/ffmpeg"
 	"yt2abs/internal/metadata"
+	"yt2abs/internal/utils"
 )
 
 const toolName = "yt2abs"
@@ -55,17 +56,26 @@ func Execute() {
 	baseName := metadata.GenerateBaseFilename(product.Title, product.Subtitle, *asin)
 
 	fmt.Println("Step 2: save cover image")
-	err = cover.SaveImage(product.ProductImages.Image500, "input/cover.jpg")
+	err = cover.SaveImage(product.ProductImages.Image500)
 	if err != nil {
 		fmt.Println("Cover couldn't be saved:", err)
 	}
 
 	fmt.Println("Step 3: creating FFMETADATA.txt")
-	metadata.CreateFFMETADATA(product)
+	metadata.CreateFFMETADATA(product, *chapterFile)
 
 	fmt.Println("Step 4: creating .cue chapter file")
 	cue.CreateCue(baseName, *chapterFile)
 
 	fmt.Println("Step 5: creating .m4b audiobook")
-	ffmpeg.CreateAudiobook(baseName)
+	ffmpeg.CreateAudiobook(baseName, *audioFile)
+
+	defer func() {
+		err := utils.CleanTempDir()
+		if err != nil {
+			fmt.Println("Error cleaning up temp directory:", err)
+		} else {
+			fmt.Println("Final Step: Temporary files cleaned up.")
+		}
+	}()
 }

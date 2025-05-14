@@ -4,28 +4,35 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"yt2abs/internal/types"
+	"yt2abs/internal/utils"
 )
 
-func CreateFFMETADATA(product *types.Product) {
-	inputFile := "input/chapters.txt"
-	outputFile := "input/FFMETADATA.txt"
+func CreateFFMETADATA(product *types.Product, chapterFile string) {
+	tempDir := utils.TempDirPath()
+	if tempDir == "" {
+		fmt.Println("Error: Could not create temporary directory.")
+		return
+	}
 
-	in, err := os.Open(inputFile)
+	outputFile := filepath.Join(tempDir, "FFMETADATA.txt")
+
+	in, err := os.Open(chapterFile)
 	if err != nil {
-		fmt.Println("Fehler beim Öffnen der Eingabedatei:", err)
+		fmt.Println("Error while opening chapter file:", err)
 		return
 	}
 	defer in.Close()
 
 	out, err := os.Create(outputFile)
 	if err != nil {
-		fmt.Println("Fehler beim Erstellen der Ausgabedatei:", err)
+		fmt.Println("Error while creating output file:", err)
 		return
 	}
 	defer out.Close()
@@ -69,7 +76,7 @@ func CreateFFMETADATA(product *types.Product) {
 
 		startSec, err := parseTimeToSeconds(startTimeStr)
 		if err != nil {
-			fmt.Println("Ungültiges Zeitformat:", startTimeStr)
+			fmt.Println("Invalid time format:", startTimeStr)
 			continue
 		}
 
@@ -81,7 +88,7 @@ func CreateFFMETADATA(product *types.Product) {
 	}
 
 	if !strings.HasSuffix(strings.ToLower(lastLine), "end") {
-		fmt.Println("Fehler: Die letzte Zeile in der Datei muss ein gültiger 'End'-Eintrag sein.")
+		fmt.Println("Error: The last line in the chapter file must be a valid 'End' entry.")
 		return
 	}
 
@@ -100,7 +107,7 @@ func CreateFFMETADATA(product *types.Product) {
 	}
 
 	writer.Flush()
-	fmt.Println("Konvertierung abgeschlossen:", outputFile)
+	fmt.Println("Conversion completed. METADATA file saved to:", outputFile)
 }
 
 func parseTimeToSeconds(timeStr string) (int, error) {
@@ -120,7 +127,6 @@ func extractNames(items []types.Person) string {
 }
 
 func stripHTMLTags(input string) string {
-	// Entfernt alle einfachen HTML-Tags wie <p>, <i>, </p>, etc.
 	re := regexp.MustCompile(`</?[^>]+>`)
 	return re.ReplaceAllString(input, "")
 }
@@ -128,7 +134,7 @@ func stripHTMLTags(input string) string {
 func extractYear(dateStr string) string {
 	t, err := time.Parse("2006-01-02", dateStr)
 	if err != nil {
-		return dateStr // Fallback: Gib Original zurück, falls Parsing fehlschlägt
+		return dateStr
 	}
 	return fmt.Sprintf("%d", t.Year())
 }
