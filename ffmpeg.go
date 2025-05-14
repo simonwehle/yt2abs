@@ -16,15 +16,16 @@ func FFMPEG() {
 	}
 
 	cmd := exec.Command("ffmpeg",
-		"-i", "input/input.mp3",
+		"-i", "input/audiobook.mp3",
 		"-i", "input/cover.jpg",
 		"-i", "input/FFMETADATA.txt",
 		"-map", "0:a",
-		"-map", "1",
+		"-map", "1:v",
 		"-map_metadata", "2",
 		"-c:a", "aac",
 		"-b:a", "64k",
-		"-vn",
+		"-c:v", "mjpeg",
+		"-disposition:v", "attached_pic",
 		"-movflags", "+faststart",
 		"output/output.m4b",
 	)

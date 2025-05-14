@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
+	"time"
 )
 
 type Person struct {
@@ -51,7 +53,7 @@ func fetchAudibleMetadata(asin string) (*Product, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Fehlerhafte Antwort vom Server: %d", resp.StatusCode)
+		return nil, fmt.Errorf("faulty server response: %d", resp.StatusCode)
 	}
 
 	var data AudibleResponse
@@ -68,4 +70,18 @@ func extractNames(items []Person) string {
 		names[i] = item.Name
 	}
 	return strings.Join(names, ", ")
+}
+
+func stripHTMLTags(input string) string {
+	// Entfernt alle einfachen HTML-Tags wie <p>, <i>, </p>, etc.
+	re := regexp.MustCompile(`</?[^>]+>`)
+	return re.ReplaceAllString(input, "")
+}
+
+func extractYear(dateStr string) string {
+	t, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		return dateStr // Fallback: Gib Original zurück, falls Parsing fehlschlägt
+	}
+	return fmt.Sprintf("%d", t.Year())
 }
