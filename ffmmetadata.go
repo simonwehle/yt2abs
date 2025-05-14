@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func FFMETADATA() {
+func FFMETADATA(product *Product) {
 	inputFile := "input/chapters.txt"
 	outputFile := "input/FFMETADATA.txt"
 
@@ -29,6 +29,20 @@ func FFMETADATA() {
 
 	writer := bufio.NewWriter(out)
 	writer.WriteString(";FFMETADATA1\n")
+
+	authors := extractNames(product.Authors)
+	narrators := extractNames(product.Narrators)
+	comment := strings.ReplaceAll(product.PublisherSummary, "\n", " ")
+	comment = strings.ReplaceAll(comment, "\r", " ")
+
+	writer.WriteString(fmt.Sprintf("title=%s\n", product.Title))
+	writer.WriteString(fmt.Sprintf("album=%s\n", product.Title))
+	writer.WriteString(fmt.Sprintf("artist=%s\n", authors))
+	writer.WriteString(fmt.Sprintf("composer=%s\n", narrators))
+	writer.WriteString(fmt.Sprintf("date=%s\n", product.ReleaseDate))
+	writer.WriteString(fmt.Sprintf("publisher=%s\n", product.PublisherName))
+	writer.WriteString(fmt.Sprintf("comment=%s\n", comment))
+	writer.WriteString("\n")
 
 	scanner := bufio.NewScanner(in)
 	type Chapter struct {
