@@ -7,10 +7,10 @@ import (
 	"strings"
 )
 
-func CUE() {
+func CUE(baseName string) {
 	inputFile := "input/chapters.txt"
-	outputFile := "output/output.cue"
-	audioFileName := "audiofile.mp3" // Kann angepasst oder als Argument übergeben werden
+	outputFile := "output/" + baseName + ".cue"
+	audioFileName := baseName + ".m4b"
 
 	in, err := os.Open(inputFile)
 	if err != nil {
