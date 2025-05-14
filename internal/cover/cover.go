@@ -1,4 +1,4 @@
-package main
+package cover
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func SaveCoverImage(url string, outputPath string) error {
+func SaveImage(url string, outputPath string) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		return fmt.Errorf("error while fetching cover: %w", err)

@@ -1,12 +1,9 @@
-package main
+package audible
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"regexp"
-	"strings"
-	"time"
 )
 
 type Person struct {
@@ -32,7 +29,7 @@ type AudibleResponse struct {
 	Product Product `json:"product"`
 }
 
-func fetchAudibleMetadata(asin string) (*Product, error) {
+func FetchMetadata(asin string) (*Product, error) {
 	url  := fmt.Sprintf("https://api.audible.com/1.0/catalog/products/%s?response_groups=media,product_extended_attrs", asin)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -62,26 +59,4 @@ func fetchAudibleMetadata(asin string) (*Product, error) {
 	}
 
 	return &data.Product, nil
-}
-
-func extractNames(items []Person) string {
-	names := make([]string, len(items))
-	for i, item := range items {
-		names[i] = item.Name
-	}
-	return strings.Join(names, ", ")
-}
-
-func stripHTMLTags(input string) string {
-	// Entfernt alle einfachen HTML-Tags wie <p>, <i>, </p>, etc.
-	re := regexp.MustCompile(`</?[^>]+>`)
-	return re.ReplaceAllString(input, "")
-}
-
-func extractYear(dateStr string) string {
-	t, err := time.Parse("2006-01-02", dateStr)
-	if err != nil {
-		return dateStr // Fallback: Gib Original zurück, falls Parsing fehlschlägt
-	}
-	return fmt.Sprintf("%d", t.Year())
 }

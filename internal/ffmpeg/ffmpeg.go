@@ -1,13 +1,12 @@
-package main
+package ffmpeg
 
 import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 )
 
-func FFMPEG(baseName string) {
+func CreateAudiobook(baseName string) {
 	outputDir := "output"
 	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
 		if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -41,13 +40,4 @@ func FFMPEG(baseName string) {
 	}
 
 	fmt.Println("FFmpeg-conversion successful")
-}
-
-func generateBaseFilename(title, subtitle, asin string) string {
-	base := strings.TrimSpace(title)
-	if subtitle != "" {
-		base += ": " + strings.TrimSpace(subtitle)
-	}
-	base += fmt.Sprintf(" [%s]", asin)
-	return base
 }

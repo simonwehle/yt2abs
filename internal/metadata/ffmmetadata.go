@@ -1,15 +1,18 @@
-package main
+package metadata
 
 import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"yt2abs/internal/audible"
 )
 
-func FFMETADATA(product *Product) {
+func CreateFFMETADATA(product *audible.Product) {
 	inputFile := "input/chapters.txt"
 	outputFile := "input/FFMETADATA.txt"
 
@@ -106,4 +109,35 @@ func parseTimeToSeconds(timeStr string) (int, error) {
 		return 0, err
 	}
 	return t.Hour()*3600 + t.Minute()*60 + t.Second(), nil
+}
+
+func extractNames(items []audible.Person) string {
+	names := make([]string, len(items))
+	for i, item := range items {
+		names[i] = item.Name
+	}
+	return strings.Join(names, ", ")
+}
+
+func stripHTMLTags(input string) string {
+	// Entfernt alle einfachen HTML-Tags wie <p>, <i>, </p>, etc.
+	re := regexp.MustCompile(`</?[^>]+>`)
+	return re.ReplaceAllString(input, "")
+}
+
+func extractYear(dateStr string) string {
+	t, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		return dateStr // Fallback: Gib Original zurück, falls Parsing fehlschlägt
+	}
+	return fmt.Sprintf("%d", t.Year())
+}
+
+func GenerateBaseFilename(title, subtitle, asin string) string {
+	base := strings.TrimSpace(title)
+	if subtitle != "" {
+		base += ": " + strings.TrimSpace(subtitle)
+	}
+	base += fmt.Sprintf(" [%s]", asin)
+	return base
 }

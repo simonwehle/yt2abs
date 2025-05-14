@@ -1,4 +1,4 @@
-package main
+package cue
 
 import (
 	"bufio"
@@ -7,12 +7,11 @@ import (
 	"strings"
 )
 
-func CUE(baseName string) {
-	inputFile := "input/chapters.txt"
+func CreateCue(baseName string, chapterFilePath string) {
 	outputFile := "output/" + baseName + ".cue"
 	audioFileName := baseName + ".m4b"
 
-	in, err := os.Open(inputFile)
+	in, err := os.Open(chapterFilePath)
 	if err != nil {
 		fmt.Println("Fehler beim Öffnen der Eingabedatei:", err)
 		return
