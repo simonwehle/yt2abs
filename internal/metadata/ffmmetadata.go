@@ -1,28 +1,38 @@
-package main
+package metadata
 
 import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"yt2abs/internal/types"
+	"yt2abs/internal/utils"
 )
 
-func FFMETADATA(product *Product) {
-	inputFile := "input/chapters.txt"
-	outputFile := "input/FFMETADATA.txt"
+func CreateFFMETADATA(product *types.Product, chapterFile string) {
+	tempDir := utils.TempDirPath()
+	if tempDir == "" {
+		fmt.Println("Error: Could not create temporary directory.")
+		return
+	}
 
-	in, err := os.Open(inputFile)
+	outputFile := filepath.Join(tempDir, "FFMETADATA.txt")
+
+	in, err := os.Open(chapterFile)
 	if err != nil {
-		fmt.Println("Fehler beim Öffnen der Eingabedatei:", err)
+		fmt.Println("Error while opening chapter file:", err)
 		return
 	}
 	defer in.Close()
 
 	out, err := os.Create(outputFile)
 	if err != nil {
-		fmt.Println("Fehler beim Erstellen der Ausgabedatei:", err)
+		fmt.Println("Error while creating output file:", err)
 		return
 	}
 	defer out.Close()
@@ -66,7 +76,7 @@ func FFMETADATA(product *Product) {
 
 		startSec, err := parseTimeToSeconds(startTimeStr)
 		if err != nil {
-			fmt.Println("Ungültiges Zeitformat:", startTimeStr)
+			fmt.Println("Invalid time format:", startTimeStr)
 			continue
 		}
 
@@ -78,7 +88,7 @@ func FFMETADATA(product *Product) {
 	}
 
 	if !strings.HasSuffix(strings.ToLower(lastLine), "end") {
-		fmt.Println("Fehler: Die letzte Zeile in der Datei muss ein gültiger 'End'-Eintrag sein.")
+		fmt.Println("Error: The last line in the chapter file must be a valid 'End' entry.")
 		return
 	}
 
@@ -97,7 +107,7 @@ func FFMETADATA(product *Product) {
 	}
 
 	writer.Flush()
-	fmt.Println("Konvertierung abgeschlossen:", outputFile)
+	fmt.Println("Conversion completed. METADATA file saved to:", outputFile)
 }
 
 func parseTimeToSeconds(timeStr string) (int, error) {
@@ -106,4 +116,34 @@ func parseTimeToSeconds(timeStr string) (int, error) {
 		return 0, err
 	}
 	return t.Hour()*3600 + t.Minute()*60 + t.Second(), nil
+}
+
+func extractNames(items []types.Person) string {
+	names := make([]string, len(items))
+	for i, item := range items {
+		names[i] = item.Name
+	}
+	return strings.Join(names, ", ")
+}
+
+func stripHTMLTags(input string) string {
+	re := regexp.MustCompile(`</?[^>]+>`)
+	return re.ReplaceAllString(input, "")
+}
+
+func extractYear(dateStr string) string {
+	t, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		return dateStr
+	}
+	return fmt.Sprintf("%d", t.Year())
+}
+
+func GenerateBaseFilename(title, subtitle, asin string) string {
+	base := strings.TrimSpace(title)
+	if subtitle != "" {
+		base += ": " + strings.TrimSpace(subtitle)
+	}
+	base += fmt.Sprintf(" [%s]", asin)
+	return base
 }

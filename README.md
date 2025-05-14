@@ -28,3 +28,10 @@ folder/
 0:13:37 Chapter without prefix
 6:94:20 End
 ```
+
+### build
+
+```
+go build -o yt2abs .
+sudo mv yt2abs /usr/local/bin/
+```
