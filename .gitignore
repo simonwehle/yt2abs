@@ -25,9 +25,4 @@ go.work.sum
 # env file
 .env
 
-# Ignore Folder
-input/*
-output/*
-
-# Keep Input Folder
-!input/chapters.txt.example
+yt2abs
