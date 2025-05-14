@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"yt2abs/internal/audible"
+	"yt2abs/internal/types"
 )
 
-func CreateFFMETADATA(product *audible.Product) {
+func CreateFFMETADATA(product *types.Product) {
 	inputFile := "input/chapters.txt"
 	outputFile := "input/FFMETADATA.txt"
 
@@ -111,7 +111,7 @@ func parseTimeToSeconds(timeStr string) (int, error) {
 	return t.Hour()*3600 + t.Minute()*60 + t.Second(), nil
 }
 
-func extractNames(items []audible.Person) string {
+func extractNames(items []types.Person) string {
 	names := make([]string, len(items))
 	for i, item := range items {
 		names[i] = item.Name
