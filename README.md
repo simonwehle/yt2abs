@@ -1,16 +1,13 @@
 # audiobook-converter
 
+> [!WARNING]  
+> This project uses ffmpeg make sure you have it installed
+
+Paste the required files in the `input` folder
+
 ```
-ffmpeg \
-  -i input.mp3 \
-  -i cover.jpg \
-  -i chapters.txt \
-  -map 0:a \
-  -map 1 \
-  -map_metadata 2 \
-  -c:a aac \
-  -b:a 64k \
-  -vn \
-  -movflags +faststart \
-  output.m4b
+input/
+├── audiobook.mp3
+├── chapters.txt
+└── cover.jpg
 ```
