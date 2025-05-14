@@ -3,7 +3,7 @@
 > [!WARNING]  
 > This project uses ffmpeg make sure you have it installed
 
-yt2abs is a cli tool that converts .mp3 files into an .m4b audiobook with chapters and metadata from audible
+yt2abs is a cli tool that converts .mp3 files (from youtube) into an .m4b audiobook with chapters and metadata from audible to be used in audiobookshelf
 
 ### usage:
 
