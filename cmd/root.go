@@ -14,7 +14,7 @@ import (
 )
 
 const toolName = "yt2abs"
-const version = "1.0.0"
+const version = "1.1.0"
 
 func printHelp() {
 	fmt.Printf("Usage: %s -a <ASIN> [-i <InputAudio>] [-c <ChaptersFile>] [-o <OutputLocation>]\n", toolName)
