@@ -9,17 +9,14 @@ import (
 )
 
 func FetchMetadata(asin string) (*types.Product, error) {
-	url  := fmt.Sprintf("https://api.audible.com/1.0/catalog/products/%s?response_groups=media,product_extended_attrs", asin)
+	url  := fmt.Sprintf("https://api.audible.com/1.0/catalog/products/%s?response_groups=media,product_extended_attrs,category_ladders", asin)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// Set fake User-Agent to avoid blocking
 	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; audible-scraper/1.0)")
-	// Optionally set Accept if needed
-	req.Header.Set("Accept", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

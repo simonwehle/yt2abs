@@ -4,6 +4,16 @@ type Person struct {
 	Name string `json:"name"`
 }
 
+type Category struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type CategoryLadder struct {
+	Ladder []Category `json:"ladder"`
+	Root   string     `json:"root"`
+}
+
 type Product struct {
 	Title            string `json:"title"`
 	Subtitle         string `json:"subtitle"`
@@ -17,6 +27,8 @@ type Product struct {
 	ProductImages struct {
 		Image500 string `json:"500"`
 	} `json:"product_images"`
+
+	CategoryLadders []CategoryLadder `json:"category_ladders"`
 }
 
 type AudibleResponse struct {
