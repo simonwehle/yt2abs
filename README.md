@@ -1,14 +1,14 @@
 # yt2abs
 
+yt2abs is a cli tool that converts .mp3 files (from youtube) into an .m4b audiobook with chapters and metadata from audible to be used in audiobookshelf
+
 > [!WARNING]  
 > This project uses ffmpeg make sure you have it installed
-
-yt2abs is a cli tool that converts .mp3 files (from youtube) into an .m4b audiobook with chapters and metadata from audible to be used in audiobookshelf
 
 ### usage:
 
 ```
-yt2abs --asin B07KKMNZCH
+yt2abs --a B07KKMNZCH
 ```
 
 default file names:
@@ -20,6 +20,8 @@ folder/
 ```
 
 `chapters.txt` example
+
+⚠️ Make sure to format all timestamps in the format "hour:minute:second" and add a chapter named "End" with the full lenght of the file
 
 ```
 0:00:00 Introduction

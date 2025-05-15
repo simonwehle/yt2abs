@@ -14,21 +14,26 @@ import (
 )
 
 const toolName = "yt2abs"
+const version = "1.0.0"
 
 func printHelp() {
-	fmt.Printf("Usage: %s --asin <ASIN> [--audio <AudioFile>] [--chapters <ChaptersFile>]\n", toolName)
+	fmt.Printf("Usage: %s -a <ASIN> [-i <InputAudio>] [-c <ChaptersFile>] [-o <OutputLocation>]\n", toolName)
 	fmt.Println("\nOptions:")
-	fmt.Println("  --asin <ASIN>        Audible ASIN (e.g., B0BJ35FVXD) - Required")
-	fmt.Println("  --audio <AudioFile>  Path to the MP3 file (default: audiobook.mp3)")
-	fmt.Println("  --chapters <ChaptersFile> Path to the chapters text file (default: chapters.txt)")
-	fmt.Println("  --help               Show this help message")
+	fmt.Println("  -a <ASIN>         Audible ASIN (e.g., B07KKMNZCH) - Required")
+	fmt.Println("  -i <InputAudio>   Path to the MP3 file (default: audiobook.mp3)")
+	fmt.Println("  -c <ChaptersFile> Path to the chapters file (default: chapters.txt)")
+	fmt.Println("  -o <OutputPath>   Path to output location")
+	fmt.Println("  -h                Show this help message")
+	fmt.Println("  -v                Show version")
 }
 
 func Execute() {
-	asin := flag.String("asin", "", "Audible ASIN (e.g., B0BJ35FVXD)")
-	audioFile := flag.String("audio", "audiobook.mp3", "Path to the MP3 file")
-	chapterFile := flag.String("chapters", "chapters.txt", "Path to the chapters file")
-	showHelp := flag.Bool("help", false, "Show this help message")
+	asin := flag.String("a", "", "Audible ASIN (e.g., B07KKMNZCH)")
+	audioFile := flag.String("i", "audiobook.mp3", "Path to the MP3 file")
+	chapterFile := flag.String("c", "chapters.txt", "Path to the chapters file")
+	outputFolder := flag.String("o", "", "Path to output location")
+	showHelp := flag.Bool("h", false, "Show this help message")
+	showVersion := flag.Bool("v", false, "Show version")
 
 	flag.Parse()
 
@@ -37,14 +42,25 @@ func Execute() {
 		return
 	}
 
+	if *showVersion {
+		fmt.Println("yt2abs version", version)
+		return
+	}
+
 	if *asin == "" {
-		fmt.Printf("Error: --asin is required. Use '%s --help' for more information.\n", toolName)
+		fmt.Println("Error: ASIN is required. Use -h for help.")
 		os.Exit(1)
 	}
 
-	fmt.Println("ASIN:", *asin)
-	fmt.Println("Audio:", *audioFile)
-	fmt.Println("Kapitel:", *chapterFile)
+	outputBase := "."
+	if *outputFolder != "" {
+		info, err := os.Stat(*outputFolder)
+		if err != nil || !info.IsDir() {
+			fmt.Fprintf(os.Stderr, "Fehler: Ausgabeordner '%s' existiert nicht.\n", *outputFolder)
+			os.Exit(1)
+		}
+		outputBase = *outputFolder
+	}
 
 	fmt.Println("Step 1: fetch Audible Metadata")
 	product, err := audible.FetchMetadata(*asin)
@@ -54,7 +70,7 @@ func Execute() {
 	}
 
 	baseName := metadata.GenerateBaseFilename(product.Title, product.Subtitle, *asin)
-	outputDir := utils.GenerateOutputDir(product.Title, *asin)
+	outputDir := utils.GenerateOutputDir(outputBase, product.Title, *asin)
 
 	fmt.Println("Step 2: save cover image")
 	err = cover.SaveImage(product.ProductImages.Image500)
