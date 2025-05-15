@@ -9,14 +9,15 @@ import (
 	"yt2abs/internal/utils"
 )
 
-func CreateAudiobook(baseName, audioFile string) {
+func CreateAudiobook(baseName, outputDir, audioFile string) {
 	tempDir := utils.TempDirPath()
 	if tempDir == "" {
 		fmt.Println("Error: Could not create temporary directory.")
 		return
 	}
 
-	m4bPath := baseName+".m4b"
+	m4bFile := baseName+".m4b"
+	m4bPath := filepath.Join(outputDir, m4bFile)
 	coverPath := filepath.Join(tempDir, "cover.jpg")
 	metadataPath := filepath.Join(tempDir, "FFMETADATA.txt")
 
@@ -32,6 +33,7 @@ func CreateAudiobook(baseName, audioFile string) {
 		"-c:v", "mjpeg",
 		"-disposition:v", "attached_pic",
 		"-movflags", "+faststart",
+		"-metadata", "encoded_by=",
 		m4bPath,
 	)
 

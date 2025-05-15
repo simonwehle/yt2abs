@@ -4,23 +4,27 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
-func CreateCue(baseName string, chapterFilePath string) {
-	outputFile := baseName + ".cue"
+// cue/cue.go
+func CreateCue(baseName, outputDir, chapterFilePath string) {
+	os.MkdirAll(outputDir, 0755)
+
+	outputFile := filepath.Join(outputDir, fmt.Sprintf("%s.cue", baseName))
 	audioFileName := baseName + ".m4b"
 
 	in, err := os.Open(chapterFilePath)
 	if err != nil {
-		fmt.Println("Fehler beim Öffnen der Eingabedatei:", err)
+		fmt.Println("Error opening chapter file:", err)
 		return
 	}
 	defer in.Close()
 
 	out, err := os.Create(outputFile)
 	if err != nil {
-		fmt.Println("Fehler beim Erstellen der Ausgabedatei:", err)
+		fmt.Println("Error creating CUE file:", err)
 		return
 	}
 	defer out.Close()
@@ -39,19 +43,18 @@ func CreateCue(baseName string, chapterFilePath string) {
 		}
 
 		timestamp := strings.TrimSpace(parts[0])
-		title := strings.TrimSpace(parts[1])
+		baseName := strings.TrimSpace(parts[1])
 
-		if strings.ToLower(title) == "end" {
+		if strings.ToLower(baseName) == "end" {
 			continue
 		}
 
 		writer.WriteString(fmt.Sprintf("  TRACK %02d AUDIO\n", trackNum))
-		writer.WriteString(fmt.Sprintf("    TITLE \"%s\"\n", title))
+		writer.WriteString(fmt.Sprintf("    baseName \"%s\"\n", baseName))
 		writer.WriteString(fmt.Sprintf("    INDEX 01 %s\n", timestamp))
-
 		trackNum++
 	}
 
 	writer.Flush()
-	fmt.Println("CUE-Datei geschrieben:", outputFile)
+	fmt.Println("CUE file written to:", outputFile)
 }

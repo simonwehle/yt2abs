@@ -54,6 +54,7 @@ func Execute() {
 	}
 
 	baseName := metadata.GenerateBaseFilename(product.Title, product.Subtitle, *asin)
+	outputDir := utils.GenerateOutputDir(product.Title, *asin)
 
 	fmt.Println("Step 2: save cover image")
 	err = cover.SaveImage(product.ProductImages.Image500)
@@ -65,10 +66,10 @@ func Execute() {
 	metadata.CreateFFMETADATA(product, *chapterFile)
 
 	fmt.Println("Step 4: creating .cue chapter file")
-	cue.CreateCue(baseName, *chapterFile)
+	cue.CreateCue(baseName, outputDir, *chapterFile)
 
 	fmt.Println("Step 5: creating .m4b audiobook")
-	ffmpeg.CreateAudiobook(baseName, *audioFile)
+	ffmpeg.CreateAudiobook(baseName, outputDir, *audioFile)
 
 	defer func() {
 		err := utils.CleanTempDir()

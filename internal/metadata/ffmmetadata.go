@@ -44,7 +44,15 @@ func CreateFFMETADATA(product *types.Product, chapterFile string) {
 	narrators := extractNames(product.Narrators)
 	comment := strings.ReplaceAll(stripHTMLTags(product.PublisherSummary), "\n", " ")
 	comment = strings.ReplaceAll(comment, "\r", " ")
-	genre := product.CategoryLadders[0].Ladder[0].Name
+	var genre string
+	if len(product.CategoryLadders) > 0 {
+		for _, item := range product.CategoryLadders[0].Ladder {
+			if !strings.Contains(item.Name, ",") {
+				genre = item.Name
+				break
+			}
+		}
+	}
 
 	writer.WriteString(fmt.Sprintf("title=%s\n", product.Title))
 	writer.WriteString(fmt.Sprintf("album=%s\n", product.Title))
