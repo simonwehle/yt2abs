@@ -8,7 +8,7 @@ yt2abs is a cli tool that converts .mp3 files (from youtube) into an .m4b audiob
 ### usage:
 
 ```
-yt2abs --a B07KKMNZCH
+yt2abs -a B07KKMNZCH
 ```
 
 default file names:
@@ -21,7 +21,7 @@ folder/
 
 `chapters.txt` example
 
-⚠️ Make sure to format all timestamps in the format "hour:minute:second" and add a chapter named "End" with the full lenght of the file
+⚠️ Make sure to format all timestamps in the format "H:MM:SS" and add a chapter named "End" with the full lenght of the file
 
 ```
 0:00:00 Introduction
