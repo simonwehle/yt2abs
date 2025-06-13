@@ -7,6 +7,8 @@ yt2abs is a cli tool that converts .mp3 files (from youtube) into an .m4b audiob
 
 ### usage:
 
+make sure you use the ASIN from audible.com
+
 ```
 yt2abs -a B07KKMNZCH
 ```

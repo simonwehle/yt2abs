@@ -21,10 +21,6 @@ func CreateAudiobook(baseName, outputDir, audioFile string, includeMetadata bool
 
 	args := []string{
 		"-i", audioFile,
-		"-c:a", "aac",
-		"-b:a", "64k",
-		"-movflags", "+faststart",
-		"-metadata", "encoded_by=",
 	}
 
 	if includeMetadata {
@@ -42,7 +38,13 @@ func CreateAudiobook(baseName, outputDir, audioFile string, includeMetadata bool
 		)
 	}
 
-	args = append(args, m4bPath)
+	args = append(args,
+		"-c:a", "aac",
+		"-b:a", "64k",
+		"-movflags", "+faststart",
+		"-metadata", "encoded_by=",
+		m4bPath,
+	)
 
 	cmd := exec.Command("ffmpeg", args...)
 	cmd.Stdout = os.Stdout
@@ -55,4 +57,3 @@ func CreateAudiobook(baseName, outputDir, audioFile string, includeMetadata bool
 
 	fmt.Println("FFmpeg conversion successful:", m4bPath)
 }
-

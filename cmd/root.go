@@ -134,8 +134,27 @@ func Execute() {
 		}
 	}
 
+/* 	if *inputFolder != "" {
+		chapterFilePath := filepath.Join(utils.TempDirPath(), "chapters.txt")
+		err := utils.GenerateChaptersFile(*inputFolder, chapterFilePath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Could not generate chapters.txt: %v\n", err)
+		}
+
+		files, err := utils.GetSortedAudioFiles(*inputFolder)
+		if err != nil {
+			fmt.Println("Error reading input folder:", err)
+			return
+		}
+		err = ffmpeg.CreateAudiobookFromFiles(baseName, outputDir, files)
+		if err != nil {
+			fmt.Println("Error creating audiobook:", err)
+			return
+		}
+	} */
+
 	fmt.Println("Creating .m4b audiobook")
-	ffmpeg.CreateAudiobook(*title, outputDir, *audioFile, includeMetadata)
+	ffmpeg.CreateAudiobook(baseName, outputDir, *audioFile, includeMetadata)
 
 	defer func() {
 		if err := utils.CleanTempDir(); err != nil {
