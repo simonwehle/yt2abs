@@ -16,37 +16,6 @@ import (
 const toolName = "yt2abs"
 const version = "1.3.0"
 
-func printHelp() {
-	fmt.Printf("Usage:\n")
-	fmt.Printf("  %s metadata [input] [chapters] [output]\n\n", toolName)
-
-	fmt.Println("Sections and Options:")
-
-	fmt.Println("\n  metadata (required)")
-	fmt.Println("    -a <ASIN>         Audible ASIN (e.g., B07KKMNZCH)")
-	fmt.Println("    -t <Title>        Title of the output audiobook")
-
-	fmt.Println("\n  input")
-	fmt.Println("    -i <InputAudio>   Path to the MP3 file (default: audiobook.mp3)")
-	fmt.Println("    -f <InputFolder>  Path to input folder (disables chapter processing)")
-
-	fmt.Println("\n  chapters (optional)")
-	fmt.Println("    -c <ChaptersFile> Path to the chapters file (default: chapters.txt)")
-	fmt.Println("                      Chapters are skipped if no file is provided.")
-
-	fmt.Println("\n  output")
-	fmt.Println("    -o <OutputPath>   Path to output folder (default: current directory)")
-
-	fmt.Println("\n  misc")
-	fmt.Println("    -h                Show this help message")
-	fmt.Println("    -v                Show version")
-
-	fmt.Println("\nExamples:")
-	fmt.Println("  yt2abs -a B07KKMNZCH                    Full auto ASIN mode")
-	fmt.Println("  yt2abs -t \"My Audiobook\"                Only MP3 to M4B")
-	fmt.Println("  yt2abs -a B07KKMNZCH -o \"/output/path\"  Define output folder")
-}
-
 func Execute() {
 	asin := flag.String("a", "", "Audible ASIN (e.g., B07KKMNZCH)")
 	title := flag.String("t", "", "Title of the output audiobook")
@@ -58,18 +27,18 @@ func Execute() {
 	showVersion := flag.Bool("v", false, "Show version")
 
 	if len(os.Args) == 1 {
-		printHelp()
+		utils.PrintHelp(toolName)
 		os.Exit(0)
 	}
 
 	flag.Parse()
 
 	if *showHelp {
-		printHelp()
+		utils.PrintHelp(toolName)
 		return
 	}
 	if *showVersion {
-		fmt.Println("yt2abs version", version)
+		fmt.Printf("%s version %s\n", toolName, version)
 		return
 	}
 
