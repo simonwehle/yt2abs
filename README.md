@@ -7,13 +7,11 @@ yt2abs is a cli tool that converts .mp3 files (from youtube) into an .m4b audiob
 
 ## usage:
 
+make sure you use the ASIN from [audible.com](https://audible.com)
+
 ### file mode
 
 to convert a single audio file to a .m4b audiobook
-
-#### full auto
-
-⚠️ Make sure you use the ASIN from audible.com
 
 ```
 yt2abs -a B07KKMNZCH
@@ -27,9 +25,9 @@ folder/
 └── chapters.txt
 ```
 
-`chapters.txt` example
+Make sure to format all timestamps in the format "H:MM:SS" and add a chapter named "End" with the full lenght of the file.
 
-⚠️ Make sure to format all timestamps in the format "H:MM:SS" and add a chapter named "End" with the full lenght of the file
+`chapters.txt` example:
 
 ```
 0:00:00 Introduction
@@ -47,7 +45,7 @@ folder mode can merge multiple chapter files to one audiobook
 yt2abs -a B017V4IM1G -f .
 ```
 
-Folder and file structure
+folder and file structure
 
 ```
 Harry Potter and the Sorcerer's Stone/
