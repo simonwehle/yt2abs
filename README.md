@@ -2,18 +2,24 @@
 
 yt2abs is a cli tool that converts .mp3 files (from youtube) into an .m4b audiobook with chapters and metadata from audible to be used in audiobookshelf
 
-> [!WARNING]  
-> This project uses ffmpeg make sure you have it installed
+> [!IMPORTANT]  
+> [ffmpeg](https://ffmpeg.org/) is required to use yt2abs
 
-### usage:
+## usage:
 
-make sure you use the ASIN from audible.com
+### file mode
+
+to convert a single audio file to a .m4b audiobook
+
+#### full auto
+
+⚠️ Make sure you use the ASIN from audible.com
 
 ```
 yt2abs -a B07KKMNZCH
 ```
 
-default file names:
+full auto mode uses the default file names
 
 ```
 folder/
@@ -33,7 +39,25 @@ folder/
 6:94:20 End
 ```
 
-### build
+### folder mode
+
+folder mode can merge multiple chapter files to one audiobook
+
+```
+yt2abs -a B017V4IM1G -f .
+```
+
+Folder and file structure
+
+```
+Harry Potter and the Sorcerer's Stone/
+├── 00 - Introduction.mp3
+├── 01 - The Boy Who Lived.mp3
+├── 02 - The Vanishing Glass.mp3
+└── 03 - The Letters From No One.mp3
+```
+
+## build
 
 ```
 go build -o yt2abs .
