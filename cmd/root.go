@@ -78,21 +78,6 @@ func Execute() {
 		}
 	}
 
-	chaptersEnabled := false
-	if *inputFolder == "" {
-		if *chapterFile != "chapters.txt" {
-			chaptersEnabled = true
-		} else if _, err := os.Stat("chapters.txt"); err == nil {
-			chaptersEnabled = true
-		} else {
-			fmt.Println("Note: No chapters provided; skipping chapter and metadata generation.")
-		}
-	} else {
-		if *chapterFile != "chapters.txt" {
-			fmt.Println("Note: -c is ignored when using -f (folder).")
-		}
-	}
-
 	var (
 		baseName       string
 		outputDir      string
@@ -121,21 +106,17 @@ func Execute() {
 			if err := cover.SaveImage(product.ProductImages.Image500); err != nil {
 				fmt.Println("Cover couldn't be saved:", err)
 			}
-			if chaptersEnabled {
-				fmt.Println("Step 3: creating FFMETADATA.txt")
-				metadata.CreateFFMETADATA(product, chapterFilePath)
+			fmt.Println("Step 3: creating FFMETADATA.txt")
+			metadata.CreateFFMETADATA(product, chapterFilePath)
 
-				fmt.Println("Step 4: creating .cue chapter file")
-				cue.CreateCue(baseName, outputDir, chapterFilePath)
-			}
+			fmt.Println("Step 4: creating .cue chapter file")
+			cue.CreateCue(baseName, outputDir, chapterFilePath)
 		} else {
 			baseName = *title
 			outputDir = utils.GenerateOutputDir(outputBase, baseName, "")
 			includeMetadata = false
-			if chaptersEnabled {
-				fmt.Println("Step 1: creating .cue chapter file")
-				cue.CreateCue(baseName, outputDir, chapterFilePath)
-			}
+			fmt.Println("Step 1: creating .cue chapter file")
+			cue.CreateCue(baseName, outputDir, *chapterFile)
 		}
 
 		files, err := utils.GetSortedAudioFiles(*inputFolder)
@@ -143,12 +124,28 @@ func Execute() {
 			fmt.Println("Error reading input folder:", err)
 			return
 		}
-		err = ffmpeg.CreateAudiobookFromFiles(baseName, outputDir, files)
+
+		fmt.Println("Creating .m4b audiobook from folder...")
+		err = ffmpeg.CreateAudiobookFromFiles(baseName, outputDir, files, includeMetadata)
 		if err != nil {
 			fmt.Println("Error creating audiobook:", err)
 			return
 		}
+	}
 
+	chaptersEnabled := false
+	if *inputFolder == "" {
+		if *chapterFile != "chapters.txt" {
+			chaptersEnabled = true
+		} else if _, err := os.Stat("chapters.txt"); err == nil {
+			chaptersEnabled = true
+		} else {
+			fmt.Println("Note: No chapters provided; skipping chapter and metadata generation.")
+		}
+	} else {
+		if *chapterFile != "chapters.txt" {
+			fmt.Println("Note: -c is ignored when using -f (folder).")
+		}
 	}
 
 	if *audioFile != "" {

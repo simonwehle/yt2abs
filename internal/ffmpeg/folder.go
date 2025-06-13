@@ -10,7 +10,7 @@ import (
 	"yt2abs/internal/utils"
 )
 
-func CreateAudiobookFromFiles(baseName, outputDir string, files []string) error {
+func CreateAudiobookFromFiles(baseName, outputDir string, files []string, includeMetadata bool) error {
 	tempDir := utils.TempDirPath()
 	if tempDir == "" {
 		return fmt.Errorf("could not create temporary directory")
@@ -42,12 +42,30 @@ func CreateAudiobookFromFiles(baseName, outputDir string, files []string) error 
 		"-f", "concat",
 		"-safe", "0",
 		"-i", concatListPath,
+	}
+
+	if includeMetadata {
+		coverPath := filepath.Join(tempDir, "cover.jpg")
+		metadataPath := filepath.Join(tempDir, "FFMETADATA.txt")
+
+		args = append(args,
+			"-i", coverPath,
+			"-i", metadataPath,
+			"-map", "0:a",
+			"-map", "1:v",
+			"-map_metadata", "2",
+			"-c:v", "mjpeg",
+			"-disposition:v", "attached_pic",
+		)
+	}
+
+	args = append(args,
 		"-c:a", "aac",
 		"-b:a", "64k",
 		"-movflags", "+faststart",
 		"-metadata", "encoded_by=",
 		m4bPath,
-	}
+	)
 
 	cmd := exec.Command("ffmpeg", args...)
 	cmd.Stdout = os.Stdout

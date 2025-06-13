@@ -40,6 +40,6 @@ func CleanTempDir() error {
 		}
 	}
 
-	fmt.Println("Temporary files have been deleted.")
+	//fmt.Println("Temporary files have been deleted.")
 	return nil
 }
