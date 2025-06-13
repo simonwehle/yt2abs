@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"yt2abs/internal/audible"
 	"yt2abs/internal/cover"
@@ -19,7 +20,7 @@ const version = "1.3.0"
 func Execute() {
 	asin := flag.String("a", "", "Audible ASIN (e.g., B07KKMNZCH)")
 	title := flag.String("t", "", "Title of the output audiobook")
-	audioFile := flag.String("i", "audiobook.mp3", "Path to the MP3 file")
+	audioFile := flag.String("i", "", "Path to the MP3 file")
 	inputFolder := flag.String("f", "", "Path to input folder")
 	chapterFile := flag.String("c", "chapters.txt", "Path to the chapters file")
 	outputFolder := flag.String("o", "", "Path to output location")
@@ -42,19 +43,17 @@ func Execute() {
 		return
 	}
 
-	if *asin == "" && *title == "" {
-		fmt.Fprintln(os.Stderr, "Error: You must specify either -a (ASIN) or -t (Title).")
+	if *inputFolder != "" && *audioFile != "" {
+		fmt.Fprintln(os.Stderr, "Error: You can't use both -i (file) and -f (folder). Choose one.")
 		os.Exit(1)
 	}
 
-	defaultAudioExists := false
-	if _, err := os.Stat("audiobook.mp3"); err == nil {
-		defaultAudioExists = true
-	}
-
-	if !defaultAudioExists && *audioFile == "audiobook.mp3" && *inputFolder == "" {
-		fmt.Fprintln(os.Stderr, "Error: No input audio found. Specify -i (audio file) or -f (folder).")
-		os.Exit(1)
+	if *inputFolder == "" && *audioFile == "" {
+		if _, err := os.Stat("audiobook.mp3"); err != nil {
+			fmt.Fprintln(os.Stderr, "Error: No input audio found. Use default audiobook.mp3, specify -i (audio file) or -f (folder).")
+			os.Exit(1)
+		}
+		*audioFile = "audiobook.mp3"
 	}
 
 	outputBase := "."
@@ -65,6 +64,18 @@ func Execute() {
 			os.Exit(1)
 		}
 		outputBase = *outputFolder
+	}
+
+	if *title == "" {
+		if *asin == "" {
+			if *inputFolder != "" {
+				base := filepath.Base(*inputFolder)
+				title = &base
+			} else {
+				base := utils.StripExtension(filepath.Base(*audioFile))
+				title = &base
+			}
+		}
 	}
 
 	chaptersEnabled := false
@@ -89,7 +100,7 @@ func Execute() {
 	)
 
 	if *asin != "" {
-		fmt.Println("Step 1: fetch Audible Metadata")
+		fmt.Println("Fetch Audible Metadata")
 		product, err := audible.FetchMetadata(*asin)
 		if err != nil {
 			fmt.Println("Error while fetching metadata:", err)
@@ -97,12 +108,14 @@ func Execute() {
 		}
 		baseName = utils.GenerateBaseFilename(product.Title, product.Subtitle, *asin)
 		outputDir = utils.GenerateOutputDir(outputBase, product.Title, *asin)
+		includeMetadata = true
 
-		fmt.Println("Step 2: save cover image")
+		fmt.Println("Save cover image")
 		if err := cover.SaveImage(product.ProductImages.Image500); err != nil {
 			fmt.Println("Cover couldn't be saved:", err)
 		}
 
+		//den Teil in eigene Funktion auslagern für audioFile
 		if chaptersEnabled {
 			fmt.Println("Step 3: creating FFMETADATA.txt")
 			metadata.CreateFFMETADATA(product, *chapterFile)
@@ -111,7 +124,8 @@ func Execute() {
 			cue.CreateCue(baseName, outputDir, *chapterFile)
 		}
 	} else {
-		outputDir = utils.GenerateOutputDir(outputBase, *title, "")
+		baseName = *title
+		outputDir = utils.GenerateOutputDir(outputBase, baseName, "")
 		includeMetadata = false
 
 		if chaptersEnabled {
