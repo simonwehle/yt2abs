@@ -99,46 +99,43 @@ func Execute() {
 		includeMetadata = false
 	)
 
-	if *asin != "" {
-		fmt.Println("Fetch Audible Metadata")
-		product, err := audible.FetchMetadata(*asin)
-		if err != nil {
-			fmt.Println("Error while fetching metadata:", err)
-			return
-		}
-		baseName = utils.GenerateBaseFilename(product.Title, product.Subtitle, *asin)
-		outputDir = utils.GenerateOutputDir(outputBase, product.Title, *asin)
-		includeMetadata = true
-
-		fmt.Println("Save cover image")
-		if err := cover.SaveImage(product.ProductImages.Image500); err != nil {
-			fmt.Println("Cover couldn't be saved:", err)
-		}
-
-		//den Teil in eigene Funktion auslagern für audioFile
-		if chaptersEnabled {
-			fmt.Println("Step 3: creating FFMETADATA.txt")
-			metadata.CreateFFMETADATA(product, *chapterFile)
-
-			fmt.Println("Step 4: creating .cue chapter file")
-			cue.CreateCue(baseName, outputDir, *chapterFile)
-		}
-	} else {
-		baseName = *title
-		outputDir = utils.GenerateOutputDir(outputBase, baseName, "")
-		includeMetadata = false
-
-		if chaptersEnabled {
-			fmt.Println("Step 1: creating .cue chapter file")
-			cue.CreateCue(baseName, outputDir, *chapterFile)
-		}
-	}
-
-/* 	if *inputFolder != "" {
+	if *inputFolder != "" {
 		chapterFilePath := filepath.Join(utils.TempDirPath(), "chapters.txt")
 		err := utils.GenerateChaptersFile(*inputFolder, chapterFilePath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Could not generate chapters.txt: %v\n", err)
+		}
+
+		if *asin != "" {
+			fmt.Println("Fetch Audible Metadata")
+			product, err := audible.FetchMetadata(*asin)
+			if err != nil {
+				fmt.Println("Error while fetching metadata:", err)
+				return
+			}
+			baseName = utils.GenerateBaseFilename(product.Title, product.Subtitle, *asin)
+			outputDir = utils.GenerateOutputDir(outputBase, product.Title, *asin)
+			includeMetadata = true
+
+			fmt.Println("Save cover image")
+			if err := cover.SaveImage(product.ProductImages.Image500); err != nil {
+				fmt.Println("Cover couldn't be saved:", err)
+			}
+			if chaptersEnabled {
+				fmt.Println("Step 3: creating FFMETADATA.txt")
+				metadata.CreateFFMETADATA(product, chapterFilePath)
+
+				fmt.Println("Step 4: creating .cue chapter file")
+				cue.CreateCue(baseName, outputDir, chapterFilePath)
+			}
+		} else {
+			baseName = *title
+			outputDir = utils.GenerateOutputDir(outputBase, baseName, "")
+			includeMetadata = false
+			if chaptersEnabled {
+				fmt.Println("Step 1: creating .cue chapter file")
+				cue.CreateCue(baseName, outputDir, chapterFilePath)
+			}
 		}
 
 		files, err := utils.GetSortedAudioFiles(*inputFolder)
@@ -151,10 +148,44 @@ func Execute() {
 			fmt.Println("Error creating audiobook:", err)
 			return
 		}
-	} */
 
-	fmt.Println("Creating .m4b audiobook")
-	ffmpeg.CreateAudiobook(baseName, outputDir, *audioFile, includeMetadata)
+	}
+
+	if *audioFile != "" {
+		if *asin != "" {
+			fmt.Println("Fetch Audible Metadata")
+			product, err := audible.FetchMetadata(*asin)
+			if err != nil {
+				fmt.Println("Error while fetching metadata:", err)
+				return
+			}
+			baseName = utils.GenerateBaseFilename(product.Title, product.Subtitle, *asin)
+			outputDir = utils.GenerateOutputDir(outputBase, product.Title, *asin)
+			includeMetadata = true
+
+			fmt.Println("Save cover image")
+			if err := cover.SaveImage(product.ProductImages.Image500); err != nil {
+				fmt.Println("Cover couldn't be saved:", err)
+			}
+			if chaptersEnabled {
+				fmt.Println("Step 3: creating FFMETADATA.txt")
+				metadata.CreateFFMETADATA(product, *chapterFile)
+
+				fmt.Println("Step 4: creating .cue chapter file")
+				cue.CreateCue(baseName, outputDir, *chapterFile)
+			}
+		} else {
+			baseName = *title
+			outputDir = utils.GenerateOutputDir(outputBase, baseName, "")
+			includeMetadata = false
+			if chaptersEnabled {
+				fmt.Println("Step 1: creating .cue chapter file")
+				cue.CreateCue(baseName, outputDir, *chapterFile)
+			}
+		}
+		fmt.Println("Creating .m4b audiobook")
+		ffmpeg.CreateAudiobook(baseName, outputDir, *audioFile, includeMetadata)
+	}
 
 	defer func() {
 		if err := utils.CleanTempDir(); err != nil {
