@@ -8,7 +8,6 @@ import (
 	"strings"
 )
 
-// cue/cue.go
 func CreateCue(baseName, outputDir, chapterFilePath string) {
 	os.MkdirAll(outputDir, 0755)
 

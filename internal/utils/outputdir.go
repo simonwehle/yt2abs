@@ -8,7 +8,15 @@ import (
 )
 
 func GenerateOutputDir(basePath, title, asin string) string {
-	dirName := fmt.Sprintf("%s [%s]", strings.TrimSpace(title), asin)
+	var dirName string
+	title = strings.TrimSpace(title)
+
+	if asin != "" {
+		dirName = fmt.Sprintf("%s [%s]", title, asin)
+	} else {
+		dirName = title
+	}
+
 	fullPath := filepath.Join(basePath, dirName)
 	os.MkdirAll(fullPath, 0755)
 	return fullPath
