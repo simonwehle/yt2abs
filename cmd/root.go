@@ -15,7 +15,7 @@ import (
 )
 
 const toolName = "yt2abs"
-const version = "1.7.5"
+const version = "1.8.0"
 
 func Execute() {
 	asin := flag.String("a", "", "Audible ASIN (e.g., B07KKMNZCH)")
@@ -140,7 +140,7 @@ func Execute() {
 		} else if _, err := os.Stat("chapters.txt"); err == nil {
 			chaptersEnabled = true
 		} else {
-			fmt.Println("Note: No chapters provided; skipping chapter and metadata generation.")
+			fmt.Println("Note: No chapters provided; skipping chapters and cue generation.")
 		}
 	} else {
 		if *chapterFile != "chapters.txt" {
@@ -156,6 +156,7 @@ func Execute() {
 				fmt.Println("Error while fetching metadata:", err)
 				return
 			}
+
 			baseName = utils.GenerateBaseFilename(product.Title, product.Subtitle, *asin)
 			outputDir = utils.GenerateOutputDir(outputBase, product.Title, *asin)
 			includeMetadata = true
@@ -164,10 +165,11 @@ func Execute() {
 			if err := cover.SaveImage(product.ProductImages.Image500); err != nil {
 				fmt.Println("Cover couldn't be saved:", err)
 			}
-			if chaptersEnabled {
-				fmt.Println("Step 3: creating FFMETADATA.txt")
-				metadata.CreateFFMETADATA(product, *chapterFile)
 
+			fmt.Println("Step 3: creating FFMETADATA.txt")
+			metadata.CreateFFMETADATA(product, *chapterFile)
+
+			if chaptersEnabled && *chapterFile != "" {
 				fmt.Println("Step 4: creating .cue chapter file")
 				cue.CreateCue(baseName, outputDir, *chapterFile)
 			}
@@ -175,11 +177,13 @@ func Execute() {
 			baseName = *title
 			outputDir = utils.GenerateOutputDir(outputBase, baseName, "")
 			includeMetadata = false
-			if chaptersEnabled {
+
+			if chaptersEnabled && *chapterFile != "" {
 				fmt.Println("Step 1: creating .cue chapter file")
 				cue.CreateCue(baseName, outputDir, *chapterFile)
 			}
 		}
+
 		fmt.Println("Creating .m4b audiobook")
 		ffmpeg.CreateAudiobook(baseName, outputDir, *audioFile, includeMetadata)
 	}

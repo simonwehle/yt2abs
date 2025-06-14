@@ -23,16 +23,9 @@ func CreateFFMETADATA(product *types.Product, chapterFile string) {
 
 	outputFile := filepath.Join(tempDir, "FFMETADATA.txt")
 
-	in, err := os.Open(chapterFile)
-	if err != nil {
-		fmt.Println("Error while opening chapter file:", err)
-		return
-	}
-	defer in.Close()
-
 	out, err := os.Create(outputFile)
 	if err != nil {
-		fmt.Println("Error while creating output file:", err)
+		fmt.Println("Error while creating metadata file:", err)
 		return
 	}
 	defer out.Close()
@@ -44,6 +37,7 @@ func CreateFFMETADATA(product *types.Product, chapterFile string) {
 	narrators := extractNames(product.Narrators)
 	comment := strings.ReplaceAll(stripHTMLTags(product.PublisherSummary), "\n", " ")
 	comment = strings.ReplaceAll(comment, "\r", " ")
+
 	var genre string
 	if len(product.CategoryLadders) > 0 {
 		for _, item := range product.CategoryLadders[0].Ladder {
@@ -64,60 +58,69 @@ func CreateFFMETADATA(product *types.Product, chapterFile string) {
 	writer.WriteString(fmt.Sprintf("comment=%s\n", comment))
 	writer.WriteString("\n")
 
-	scanner := bufio.NewScanner(in)
-	type Chapter struct {
-		Start int
-		Title string
-	}
-	var chapters []Chapter
-	var finalEnd int
-	var lastLine string
+	if chapterFile != "" {
+		if _, err := os.Stat(chapterFile); err == nil {
+			in, err := os.Open(chapterFile)
+			if err != nil {
+				fmt.Println("Warning: Failed to open chapter file. Skipping chapters:", err)
+			} else {
+				defer in.Close()
+				scanner := bufio.NewScanner(in)
+				type Chapter struct {
+					Start int
+					Title string
+				}
+				var chapters []Chapter
+				var finalEnd int
+				var lastLine string
 
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		lastLine = line
-		parts := strings.SplitN(line, " ", 2)
-		if len(parts) != 2 {
-			continue
+				for scanner.Scan() {
+					line := strings.TrimSpace(scanner.Text())
+					lastLine = line
+					parts := strings.SplitN(line, " ", 2)
+					if len(parts) != 2 {
+						continue
+					}
+
+					startTimeStr := strings.TrimSpace(parts[0])
+					title := strings.TrimSpace(parts[1])
+
+					startSec, err := parseTimeToSeconds(startTimeStr)
+					if err != nil {
+						fmt.Println("Invalid time format:", startTimeStr)
+						continue
+					}
+
+					if strings.ToLower(title) == "end" {
+						finalEnd = startSec
+					} else {
+						chapters = append(chapters, Chapter{Start: startSec, Title: title})
+					}
+				}
+
+				if strings.HasSuffix(strings.ToLower(lastLine), "end") {
+					for i, c := range chapters {
+						var end int
+						if i+1 < len(chapters) {
+							end = chapters[i+1].Start
+						} else {
+							end = finalEnd
+						}
+						writer.WriteString("[CHAPTER]\n")
+						writer.WriteString("TIMEBASE=1/1\n")
+						writer.WriteString("START=" + strconv.Itoa(c.Start) + "\n")
+						writer.WriteString("END=" + strconv.Itoa(end) + "\n")
+						writer.WriteString("title=" + c.Title + "\n")
+					}
+				} else {
+					fmt.Println("Warning: No 'End' marker found in chapter file. Skipping chapters.")
+				}
+			}
 		}
-
-		startTimeStr := strings.TrimSpace(parts[0])
-		title := strings.TrimSpace(parts[1])
-
-		startSec, err := parseTimeToSeconds(startTimeStr)
-		if err != nil {
-			fmt.Println("Invalid time format:", startTimeStr)
-			continue
-		}
-
-		if strings.ToLower(title) == "end" {
-			finalEnd = startSec
-		} else {
-			chapters = append(chapters, Chapter{Start: startSec, Title: title})
-		}
-	}
-
-	if !strings.HasSuffix(strings.ToLower(lastLine), "end") {
-		fmt.Println("Error: The last line in the chapter file must be a valid 'End' entry.")
-		return
-	}
-
-	for i, c := range chapters {
-		var end int
-		if i+1 < len(chapters) {
-			end = chapters[i+1].Start
-		} else {
-			end = finalEnd
-		}
-		writer.WriteString("[CHAPTER]\n")
-		writer.WriteString("TIMEBASE=1/1\n")
-		writer.WriteString("START=" + strconv.Itoa(c.Start) + "\n")
-		writer.WriteString("END=" + strconv.Itoa(end) + "\n")
-		writer.WriteString("title=" + c.Title + "\n")
 	}
 
 	writer.Flush()
-	fmt.Println("Conversion completed. METADATA file saved to:", outputFile)
+	fmt.Println("Metadata file written to:", outputFile)
 }
 
 func parseTimeToSeconds(timeStr string) (int, error) {
