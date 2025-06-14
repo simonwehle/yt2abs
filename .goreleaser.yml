@@ -24,6 +24,9 @@ brews:
     repository:
       owner: simonwehle
       name: homebrew-tools
+    folder: Formula
+    install: |
+      bin.install "yt2abs"
 
 checksum:
   name_template: 'checksums.txt'
