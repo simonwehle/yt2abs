@@ -1,0 +1,29 @@
+builds:
+  - binary: yt2abs
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -mod=vendor
+
+release:
+  prerelease: auto
+
+universal_binaries:
+  - replace: true
+
+brews:
+  -
+    name: simonwehle
+    homepage: "https://github.com/simonwehle/yt2abs"
+    tap:
+      owner: simonwehle
+      name: homebrew-simonwehle
+
+checksum:
+  name_template: 'checksums.txt'
