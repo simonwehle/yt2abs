@@ -24,7 +24,7 @@ brews:
     repository:
       owner: simonwehle
       name: homebrew-tools
-    folder: Formula
+    directory: Formula
     install: |
       bin.install "yt2abs"
 
