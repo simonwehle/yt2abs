@@ -21,7 +21,7 @@ brews:
   -
     name: simonwehle
     homepage: "https://github.com/simonwehle/yt2abs"
-    tap:
+    repository:
       owner: simonwehle
       name: homebrew-simonwehle
 
