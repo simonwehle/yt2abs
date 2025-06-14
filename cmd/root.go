@@ -15,7 +15,7 @@ import (
 )
 
 const toolName = "yt2abs"
-const version = "1.8.0"
+const version = "1.8.1"
 
 func Execute() {
 	asin := flag.String("a", "", "Audible ASIN (e.g., B07KKMNZCH)")
