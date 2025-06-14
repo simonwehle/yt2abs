@@ -19,11 +19,11 @@ universal_binaries:
 
 brews:
   -
-    name: simonwehle
+    name: yt2abs
     homepage: "https://github.com/simonwehle/yt2abs"
     repository:
       owner: simonwehle
-      name: homebrew-simonwehle
+      name: homebrew-tools
 
 checksum:
   name_template: 'checksums.txt'

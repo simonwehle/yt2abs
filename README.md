@@ -5,6 +5,13 @@ yt2abs is a cli tool that converts .mp3 files (from youtube) into an .m4b audiob
 > [!IMPORTANT]  
 > [ffmpeg](https://ffmpeg.org/) is required to use yt2abs
 
+## installation:
+
+```
+brew tap simonwehle/tools
+brew install yt2abs
+```
+
 ## usage:
 
 make sure you use the ASIN from [audible.com](https://audible.com)
