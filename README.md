@@ -68,3 +68,10 @@ Harry Potter and the Sorcerer's Stone/
 go build -o yt2abs .
 sudo mv yt2abs /usr/local/bin/
 ```
+
+uninstall
+
+```
+sudo rm /usr/local/bin/yt2abs
+rm -rf ~/.yt2abs
+```

@@ -124,11 +124,27 @@ func CreateFFMETADATA(product *types.Product, chapterFile string) {
 }
 
 func parseTimeToSeconds(timeStr string) (int, error) {
-	t, err := time.Parse("15:04:05", timeStr)
+	parts := strings.Split(timeStr, ":")
+	if len(parts) != 3 {
+		return 0, fmt.Errorf("invalid time format: %s", timeStr)
+	}
+
+	h, err := strconv.Atoi(parts[0])
 	if err != nil {
 		return 0, err
 	}
-	return t.Hour()*3600 + t.Minute()*60 + t.Second(), nil
+
+	m, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return 0, err
+	}
+
+	s, err := strconv.Atoi(parts[2])
+	if err != nil {
+		return 0, err
+	}
+
+	return h*3600 + m*60 + s, nil
 }
 
 func extractNames(items []types.Person) string {

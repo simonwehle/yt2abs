@@ -6,7 +6,9 @@ import (
 
 func PrintHelp(toolName string) {
 	fmt.Printf("Usage:\n")
-	fmt.Printf("  %s metadata input [chapters] [output]\n\n", toolName)
+	fmt.Printf("  %s (-a <ASIN> | -t <Title> | -i <InputAudio> | -f <InputFolder>) [-c <ChaptersFile>] [-o <OutputPath>]\n", toolName)
+	fmt.Printf("  Note: Provide either metadata (-a or -t), or input (-i or -f), or both.\n\n")
+
 
 	fmt.Println("Sections and Options:")
 
@@ -17,6 +19,7 @@ func PrintHelp(toolName string) {
 	fmt.Println("\n  input (required if no metadata is set)")
 	fmt.Println("    -i <InputAudio>   Path to the MP3 file (default: audiobook.mp3)")
 	fmt.Println("    -f <InputFolder>  Path to input folder (chapters by file length)")
+	fmt.Println("                      Note: -i and -f cannot be used together.")
 
 	fmt.Println("\n  chapters (optional)")
 	fmt.Println("    -c <ChaptersFile> Path to the chapters file (default: chapters.txt)")
