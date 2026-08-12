@@ -10,6 +10,8 @@ func GenerateBaseFilename(title, subtitle, asin string) string {
 	if subtitle != "" {
 		base += ": " + strings.TrimSpace(subtitle)
 	}
-	base += fmt.Sprintf(" [%s]", asin)
+	if asin != "" {
+		base += fmt.Sprintf(" [%s]", asin)
+	}
 	return base
 }

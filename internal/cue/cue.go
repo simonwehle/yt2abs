@@ -44,7 +44,7 @@ func CreateCue(baseName, outputDir, chapterFilePath string) {
 		timestamp := strings.TrimSpace(parts[0])
 		baseName := strings.TrimSpace(parts[1])
 
-		if strings.ToLower(baseName) == "end" {
+		if isEndMarker(baseName) {
 			continue
 		}
 
@@ -56,4 +56,9 @@ func CreateCue(baseName, outputDir, chapterFilePath string) {
 
 	writer.Flush()
 	fmt.Println("CUE file written to:", outputFile)
+}
+
+func isEndMarker(title string) bool {
+	title = strings.TrimSpace(strings.TrimLeft(title, "-"))
+	return strings.EqualFold(title, "end")
 }

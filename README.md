@@ -62,6 +62,38 @@ Harry Potter and the Sorcerer's Stone/
 └── 03 - The Letters From No One.mp3
 ```
 
+### manual metadata
+
+When no ASIN is supplied, yt2abs looks for `metadata.yml` beside the input
+audio file, or inside the input folder. A missing file keeps the usual title
+fallback behavior. If both `-a` and `metadata.yml` are present, Audible data
+takes precedence. A manual title takes precedence over `-t`.
+
+Use `-m` to load metadata from a specific file, for example `yt2abs -i book.mp3
+-m book.yml`.
+
+```yaml
+title: My Audiobook
+subtitle: Optional Subtitle
+release_date: "2024-01-15"
+publisher_name: Example Publisher
+publisher_summary: Description text
+authors:
+  - name: Author Name
+narrators:
+  - name: Narrator Name
+product_images:
+  "500": ./cover.jpg
+category_ladders:
+  - root: Fiction
+    ladder:
+      - id: fiction
+        name: Fiction
+```
+
+The `product_images."500"` value may be an HTTP/HTTPS URL, an absolute path,
+or a path relative to `metadata.yml`.
+
 ## build
 
 ```

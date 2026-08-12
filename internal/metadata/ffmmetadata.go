@@ -72,11 +72,10 @@ func CreateFFMETADATA(product *types.Product, chapterFile string) {
 				}
 				var chapters []Chapter
 				var finalEnd int
-				var lastLine string
+				hasEndMarker := false
 
 				for scanner.Scan() {
 					line := strings.TrimSpace(scanner.Text())
-					lastLine = line
 					parts := strings.SplitN(line, " ", 2)
 					if len(parts) != 2 {
 						continue
@@ -91,20 +90,25 @@ func CreateFFMETADATA(product *types.Product, chapterFile string) {
 						continue
 					}
 
-					if strings.ToLower(title) == "end" {
+					if isEndMarker(title) {
 						finalEnd = startSec
+						hasEndMarker = true
 					} else {
 						chapters = append(chapters, Chapter{Start: startSec, Title: title})
 					}
 				}
 
-				if strings.HasSuffix(strings.ToLower(lastLine), "end") {
+				if hasEndMarker && finalEnd > 0 {
 					for i, c := range chapters {
 						var end int
 						if i+1 < len(chapters) {
 							end = chapters[i+1].Start
 						} else {
 							end = finalEnd
+						}
+						if end <= c.Start {
+							fmt.Printf("Warning: Invalid chapter range for %q (%d-%d); skipping chapter.\n", c.Title, c.Start, end)
+							continue
 						}
 						writer.WriteString("[CHAPTER]\n")
 						writer.WriteString("TIMEBASE=1/1\n")
@@ -121,6 +125,13 @@ func CreateFFMETADATA(product *types.Product, chapterFile string) {
 
 	writer.Flush()
 	fmt.Println("Metadata file written to:", outputFile)
+}
+
+func isEndMarker(title string) bool {
+	// Folder-generated chapter names can be "- End" when the final MP3 is
+	// named, for example, "03 - End.mp3".
+	title = strings.TrimSpace(strings.TrimLeft(title, "-"))
+	return strings.EqualFold(title, "end")
 }
 
 func parseTimeToSeconds(timeStr string) (int, error) {
