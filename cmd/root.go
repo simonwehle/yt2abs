@@ -11,6 +11,7 @@ import (
 	"yt2abs/internal/cue"
 	"yt2abs/internal/ffmpeg"
 	"yt2abs/internal/metadata"
+	"yt2abs/internal/types"
 	"yt2abs/internal/utils"
 )
 
@@ -23,6 +24,7 @@ func Execute() {
 	audioFile := flag.String("i", "", "Path to the MP3 file")
 	inputFolder := flag.String("f", "", "Path to input folder")
 	chapterFile := flag.String("c", "chapters.txt", "Path to the chapters file")
+	metadataFile := flag.String("m", "metadata.yml", "Path to the metadata file")
 	outputFolder := flag.String("o", "", "Path to output location")
 	showHelp := flag.Bool("h", false, "Show this help message")
 	showVersion := flag.Bool("v", false, "Show version")
@@ -66,6 +68,28 @@ func Execute() {
 		outputBase = *outputFolder
 	}
 
+	var manualProduct *types.Product
+	if *asin == "" {
+		metadataPath := *metadataFile
+		if metadataPath == "metadata.yml" {
+			if *inputFolder != "" {
+				metadataPath = filepath.Join(*inputFolder, "metadata.yml")
+			} else {
+				metadataPath = filepath.Join(filepath.Dir(*audioFile), "metadata.yml")
+			}
+		}
+		var err error
+		manualProduct, err = metadata.LoadSidecar(metadataPath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error loading manual metadata:", err)
+			return
+		}
+		if manualProduct != nil && manualProduct.Title != "" {
+			manualTitle := manualProduct.Title
+			title = &manualTitle
+		}
+	}
+
 	if *title == "" {
 		if *asin == "" {
 			if *inputFolder != "" {
@@ -79,8 +103,8 @@ func Execute() {
 	}
 
 	var (
-		baseName       string
-		outputDir      string
+		baseName        string
+		outputDir       string
 		includeMetadata = false
 	)
 
@@ -103,20 +127,29 @@ func Execute() {
 			includeMetadata = true
 
 			fmt.Println("Save cover image")
-			if err := cover.SaveImage(product.ProductImages.Image500); err != nil {
-				fmt.Println("Cover couldn't be saved:", err)
-			}
+			prepareCover(product.ProductImages.Image500)
 			fmt.Println("Step 3: creating FFMETADATA.txt")
 			metadata.CreateFFMETADATA(product, chapterFilePath)
 
 			fmt.Println("Step 4: creating .cue chapter file")
 			cue.CreateCue(baseName, outputDir, chapterFilePath)
 		} else {
-			baseName = *title
-			outputDir = utils.GenerateOutputDir(outputBase, baseName, "")
-			includeMetadata = false
+			if manualProduct != nil {
+				baseName = manualBaseFilename(manualProduct, *title)
+				outputDir = utils.GenerateOutputDir(outputBase, manualOutputTitle(manualProduct, *title), "")
+				includeMetadata = true
+				prepareManualMetadata(manualProduct, chapterFilePath)
+			} else {
+				baseName = *title
+				outputDir = utils.GenerateOutputDir(outputBase, baseName, "")
+				includeMetadata = false
+			}
 			fmt.Println("Step 1: creating .cue chapter file")
-			cue.CreateCue(baseName, outputDir, *chapterFile)
+			if manualProduct == nil {
+				cue.CreateCue(baseName, outputDir, *chapterFile)
+			} else {
+				cue.CreateCue(baseName, outputDir, chapterFilePath)
+			}
 		}
 
 		files, err := utils.GetSortedAudioFiles(*inputFolder)
@@ -162,9 +195,7 @@ func Execute() {
 			includeMetadata = true
 
 			fmt.Println("Save cover image")
-			if err := cover.SaveImage(product.ProductImages.Image500); err != nil {
-				fmt.Println("Cover couldn't be saved:", err)
-			}
+			prepareCover(product.ProductImages.Image500)
 
 			fmt.Println("Step 3: creating FFMETADATA.txt")
 			metadata.CreateFFMETADATA(product, *chapterFile)
@@ -174,9 +205,16 @@ func Execute() {
 				cue.CreateCue(baseName, outputDir, *chapterFile)
 			}
 		} else {
-			baseName = *title
-			outputDir = utils.GenerateOutputDir(outputBase, baseName, "")
-			includeMetadata = false
+			if manualProduct != nil {
+				baseName = manualBaseFilename(manualProduct, *title)
+				outputDir = utils.GenerateOutputDir(outputBase, manualOutputTitle(manualProduct, *title), "")
+				includeMetadata = true
+				prepareManualMetadata(manualProduct, *chapterFile)
+			} else {
+				baseName = *title
+				outputDir = utils.GenerateOutputDir(outputBase, baseName, "")
+				includeMetadata = false
+			}
 
 			if chaptersEnabled && *chapterFile != "" {
 				fmt.Println("Step 1: creating .cue chapter file")
@@ -195,4 +233,35 @@ func Execute() {
 			fmt.Println("Temporary files cleaned up.")
 		}
 	}()
+}
+
+func prepareManualMetadata(product *types.Product, chapterFile string) {
+	prepareCover(product.ProductImages.Image500)
+	metadata.CreateFFMETADATA(product, chapterFile)
+}
+
+func prepareCover(source string) {
+	if source == "" {
+		if err := cover.RemoveImage(); err != nil {
+			fmt.Println("Warning: could not clear old cover image:", err)
+		}
+		return
+	}
+	if err := cover.SaveImageSource(source); err != nil {
+		fmt.Println("Cover couldn't be saved:", err)
+	}
+}
+
+func manualOutputTitle(product *types.Product, fallback string) string {
+	if product.Title != "" {
+		return product.Title
+	}
+	return fallback
+}
+
+func manualBaseFilename(product *types.Product, fallback string) string {
+	if product.Title == "" && product.Subtitle == "" {
+		return fallback
+	}
+	return utils.GenerateBaseFilename(manualOutputTitle(product, fallback), product.Subtitle, "")
 }

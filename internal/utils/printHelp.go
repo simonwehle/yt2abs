@@ -6,15 +6,15 @@ import (
 
 func PrintHelp(toolName string) {
 	fmt.Printf("Usage:\n")
-	fmt.Printf("  %s (-a <ASIN> | -t <Title> | -i <InputAudio> | -f <InputFolder>) [-c <ChaptersFile>] [-o <OutputPath>]\n", toolName)
+	fmt.Printf("  %s (-a <ASIN> | -t <Title> | -i <InputAudio> | -f <InputFolder>) [-m <MetadataFile>] [-c <ChaptersFile>] [-o <OutputPath>]\n", toolName)
 	fmt.Printf("  Note: Provide either metadata (-a or -t), or input (-i or -f), or both.\n\n")
-
 
 	fmt.Println("Sections and Options:")
 
 	fmt.Println("\n  metadata (required when using default audiobook.mp3)")
 	fmt.Println("    -a <ASIN>         Audible ASIN (e.g., B07KKMNZCH)")
 	fmt.Println("    -t <Title>        Title of the output audiobook")
+	fmt.Println("    -m <MetadataFile> Path to the metadata file (default: metadata.yml)")
 
 	fmt.Println("\n  input (required if no metadata is set)")
 	fmt.Println("    -i <InputAudio>   Path to the MP3 file (default: audiobook.mp3)")
